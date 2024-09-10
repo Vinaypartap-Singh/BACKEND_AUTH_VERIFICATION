@@ -86,7 +86,7 @@ passRouter.post("/reset-password", async (req: Request, res: Response) => {
         // Check token
 
 
-        if (user.password_reset_token !== payload) {
+        if (user.password_reset_token !== payload.token) {
             return res.status(422).json({
                 message: "Inavlid Data", errors: {
                     email: "Make sure the url is correct for password reset.Please check the url"
