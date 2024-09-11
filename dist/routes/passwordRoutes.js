@@ -62,16 +62,17 @@ passRouter.post("/reset-password", async (req, res) => {
         if (!user) {
             return res.status(422).json({
                 message: "Inavlid Data", errors: {
-                    email: "Make sure the url is correct for password reset.Please check the url"
+                    email: "Make sure the url is correct for password reset.Please check the url. User does not exist"
                 }
             });
         }
         // Check token
-        if (user.password_reset_token !== payload.token) {
+        // * Check token
+        if (payload.token !== user.password_reset_token) {
             return res.status(422).json({
-                message: "Inavlid Data", errors: {
-                    email: "Make sure the url is correct for password reset.Please check the url"
-                }
+                errors: {
+                    email: "Please make sure you are using correct url.",
+                },
             });
         }
         // check time frame
