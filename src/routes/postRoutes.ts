@@ -174,4 +174,54 @@ postRouter.put("/post/:post_id", async (req: Request, res: Response) => {
     }
 })
 
+postRouter.delete("/delete/:post_id", async (req: Request, res: Response) => {
+    try {
+        const { post_id } = req.params
+        const logged_in_user = req.user?.id
+
+        if (!post_id) {
+            return res.status(400).json({ message: "post id not valid" })
+        }
+
+        if (!logged_in_user) {
+            return res.status(422).json({ message: "Unauthorized access" })
+        }
+
+        // check for post in database
+
+        const post = await prisma.post.findUnique({
+            where: {
+                id: Number(post_id)
+            }
+        })
+
+        if (!post) {
+            return res.status(400).json({ message: "post does not exist" })
+        }
+
+        // check whether post user id equals to logged in user id
+
+        if (logged_in_user !== post.user_id) {
+            return res.status(422).json({ message: "you are not authorized to delete this post" })
+        }
+
+        await prisma.post.delete({
+            where: {
+                id: Number(post_id)
+            }
+        })
+
+
+        return res.status(200).json({ message: "your post deleted successfully" })
+
+    } catch (error) {
+        if (error instanceof ZodError) {
+            const errors = formatError(error)
+            return res.status(422).json({ message: "Invalid details", errors: errors })
+        }
+
+        return res.status(500).json({ message: "Something Went Wrong Post Method", errors: error })
+    }
+})
+
 export default postRouter
